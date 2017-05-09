@@ -23,6 +23,8 @@ from layer_utils.proposal_target_layer import proposal_target_layer
 
 from model.config import cfg
 
+from edge_boxes import get_windows
+
 class Network(object):
   def __init__(self, batch_size=1):
     self._feat_stride = [16, ]
@@ -273,6 +275,7 @@ class Network(object):
     self._image = tf.placeholder(tf.float32, shape=[self._batch_size, None, None, 3])
     self._im_info = tf.placeholder(tf.float32, shape=[self._batch_size, 3])
     self._gt_boxes = tf.placeholder(tf.float32, shape=[None, 5])
+    self._prp_boxes = tf.placeholder(tf.float32, shape=[None, 5])
     self._tag = tag
 
     self._num_classes = num_classes
@@ -347,8 +350,13 @@ class Network(object):
 
   # only useful during testing mode
   def test_image(self, sess, image, im_info):
+    #image_filenames = "tmp.png"
+    #image.save(image_filenames)
+    #_prp_boxes = get_windows(image_filenames)
     feed_dict = {self._image: image,
                  self._im_info: im_info}
+                 #self._prp_boxes: _prp_boxes}
+
     cls_score, cls_prob, bbox_pred, rois = sess.run([self._predictions["cls_score"],
                                                      self._predictions['cls_prob'],
                                                      self._predictions['bbox_pred'],
@@ -375,10 +383,7 @@ class Network(object):
                                                                         train_op],
                                                                        feed_dict=feed_dict)
     except:
-      print('feed_dict:')
-      print(feed_dict)
       print('detail')
-      print(blobs['data'])
       print(blobs['im_info'])
       print(blobs['gt_boxes'])
 

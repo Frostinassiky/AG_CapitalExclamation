@@ -86,27 +86,35 @@ class resnetv1(Network):
     return net
 
   def proposal_fr(self, net_conv4):
-    batch_inds = tf.zeros((128, 1), dtype=tf.float32)
+   use_sw = 1
+   if use_sw:
+    batch_inds = tf.zeros((1024, 1), dtype=tf.float32)
     net_conv4_shape = tf.shape(net_conv4)
     height = (tf.to_float(net_conv4_shape[1]) - 1.) * np.float32(self._feat_stride[0])
     width = (tf.to_float(net_conv4_shape[2]) - 1.) * np.float32(self._feat_stride[0])
-    proposals_x1 = np.ones((128, 1), dtype=np.float32)
-    proposals_y1 = np.ones((128, 1), dtype=np.float32)
-    proposals_x2 = np.ones((128, 1), dtype=np.float32)
-    proposals_y2 = np.ones((128, 1), dtype=np.float32)
-    for k in range(16):
-      for l in range(8):
-        proposals_x1[k*8+l] = proposals_x1[k*8+l]* (k/17.0)
-        proposals_y1[k*8+l] = proposals_y1[k*8+l]* (l/9.0)
-        proposals_x2[k*8+l] = proposals_x2[k*8+l]* ((k+2.0)/17.0)
-        proposals_y2[k*8+l] = proposals_y2[k*8+l]* ((l+2.0)/9.0)
+    proposals_x1 = np.ones((1024, 1), dtype=np.float32)
+    proposals_y1 = np.ones((1024, 1), dtype=np.float32)
+    proposals_x2 = np.ones((1024, 1), dtype=np.float32)
+    proposals_y2 = np.ones((1024, 1), dtype=np.float32)
+    for sizexy in range(4):
+     for k in range(16):
+      for l in range(16):
+        proposals_x1[sizexy*256+k*16+l] = proposals_x1[sizexy*256+k*16+l]* (        ( k ) /(16+0.5*2**sizexy))
+        proposals_y1[sizexy*256+k*16+l] = proposals_y1[sizexy*256+k*16+l]* (        ( l ) /(16+0.5*2**sizexy))
+        proposals_x2[sizexy*256+k*16+l] = proposals_x2[sizexy*256+k*16+l]* ((k+1+0.5*2**sizexy)/(16+0.5*2**sizexy))
+        proposals_y2[sizexy*256+k*16+l] = proposals_y2[sizexy*256+k*16+l]* ((l+1+0.5*2**sizexy)/(16+0.5*2**sizexy))
     proposals_x1 = tf.stack(proposals_x1)*width
     proposals_y1 = tf.stack(proposals_y1)*height
     proposals_x2 = tf.stack(proposals_x2)*width
     proposals_y2 = tf.stack(proposals_y2)*height
     rois = tf.concat([batch_inds,proposals_x1, proposals_y1, proposals_x2, proposals_y2 ], 1)
-    roi_scores = tf.ones((128, 1), dtype=tf.float32)
+    roi_scores = tf.ones((1024, 1), dtype=tf.float32)
     return rois, roi_scores
+   else:
+    rois = self._prp_boxes[:,0:-1]
+    roi_scores = self._prp_boxes[:,-1]
+    return rois, roi_scores
+
 
   def build_network(self, sess, is_training=True):
     # select initializers
@@ -180,7 +188,8 @@ class resnetv1(Network):
     with tf.name_scope("FrostProposal"):
       with tf.name_scope("FrostRois"):
         rois, roi_scores = self.proposal_fr(net_conv4)
-      with tf.name_scope("FrostTargetLayer"):
+      if is_training:
+       with tf.name_scope("FrostTargetLayer"):
         rois, _ = self._proposal_target_layer(rois, roi_scores, "rpn_rois")
 
     pool5 = self._crop_pool_layer(net_conv4, rois, "pool5")

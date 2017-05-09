@@ -17,7 +17,7 @@ import time, os, sys
 
 import tensorflow as tf
 from nets.vgg16 import vgg16
-from nets.resnet_v1 import resnetv1
+from nets.resnet_v2 import resnetv1
 
 def parse_args():
   """
@@ -25,31 +25,33 @@ def parse_args():
   """
   parser = argparse.ArgumentParser(description='Test a Fast R-CNN network')
   parser.add_argument('--cfg', dest='cfg_file',
-            help='optional config file', default=None, type=str)
+            help='optional config file', default="/home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/experiments/cfgs/res101.yml", type=str)
   parser.add_argument('--model', dest='model',
             help='model to test',
-            default=None, type=str)
+            # default="/home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/data/imagenet_weights/res101.ckpt",
+                      default = "/home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/output/default/coco_2017_train/default/res101_faster_rcnn_iter_20000.ckpt",
+                      type=str)
   parser.add_argument('--imdb', dest='imdb_name',
             help='dataset to test',
-            default='voc_2007_test', type=str)
-  parser.add_argument('--comp', dest='comp_mode', help='competition mode',
+            default='coco_style_fish', type=str)
+  parser.add_argument('--comp', dest='comp_mode', help='competition mode',default = True,
             action='store_true')
   parser.add_argument('--num_dets', dest='max_per_image',
             help='max number of detections per image',
-            default=100, type=int)
+            default=20, type=int)
   parser.add_argument('--tag', dest='tag',
                         help='tag of the model',
                         default='', type=str)
   parser.add_argument('--net', dest='net',
                       help='vgg16, res50, res101, res152',
-                      default='res50', type=str)
+                      default='res101', type=str)
   parser.add_argument('--set', dest='set_cfgs',
                         help='set config keys', default=None,
                         nargs=argparse.REMAINDER)
 
   if len(sys.argv) == 1:
     parser.print_help()
-    sys.exit(1)
+    # sys.exit(1)
 
   args = parser.parse_args()
   return args

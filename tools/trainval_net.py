@@ -19,7 +19,8 @@ import sys
 
 import tensorflow as tf
 from nets.vgg16 import vgg16
-from nets.resnet_v1 import resnetv1
+from nets.forknet import resnetv1
+#from nets.resnet_v2 import resnetv1
 
 def parse_args():
   """
@@ -36,17 +37,19 @@ def parse_args():
                       type=str)
   parser.add_argument('--imdb', dest='imdb_name',
                       help='dataset to train on',
-                      default='coco_2014_train',
-                      #default='coco_style_fish',
+                      #default='coco_2014_train',
+                      default='coco_style_fish',
+                      #default='coco_style_face',
                       type=str)
   parser.add_argument('--imdbval', dest='imdbval_name',
                       help='dataset to validate on',
-                      default='coco_2014_minival',
-                      #default='coco_style_fish',
+                      #default='coco_2014_minival',
+                      default='coco_style_fish',
+                      #default='coco_style_face',
                       type=str)
   parser.add_argument('--iters', dest='max_iters',
                       help='number of iterations to train',
-                      default=490000, type=int)
+                      default=20000, type=int)
   parser.add_argument('--tag', dest='tag',
                       help='tag of the model',
                       default=None, type=str)
