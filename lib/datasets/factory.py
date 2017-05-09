@@ -38,6 +38,8 @@ for year in ['2015']:
 __sets['coco_style_fish'] = (lambda split='train', year='2017': coco(split, year))
 __sets['coco_style_fish_minival'] = (lambda split='minival', year='2017': coco(split, year))
 
+__sets['coco_style_face'] = (lambda split='alpha', year='2017': coco(split, year))
+
 def get_imdb(name):
   """Get an imdb (image database) by name."""
   if name not in __sets:
