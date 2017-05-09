@@ -71,7 +71,7 @@ while index <= length(fileContent)
              x0 = x0 * sizexy(2)/W;		
              y0 = y0 * sizexy(1)/H;		
              w0 = (w*(1+2*ex)) * sizexy(2)/W;		
-             h0 =  (y*(1+2*ex)) * sizexy(1)/H;
+             h0 =  (h*(1+2*ex)) * sizexy(1)/H;
              Bbox(pictNum , :) =[x0,y0,w0,h0];
              try
                 imgHead = image(y:y1,x:x1, :);
