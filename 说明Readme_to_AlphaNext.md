@@ -1,7 +1,7 @@
 # [ AlphaGo！] 模型：ForkNet
 by _Frost_, _Yiye_, and _Baojia_!
 
-Devoloped from https://github.com/endernewton/tf-faster-rcnn
+声明，该工作继承自_endernewton_的faster-rcnn框架，原来的链接可以参考 https://github.com/endernewton/tf-faster-rcnn
 
 ## Installation
 1. Clone the repository
