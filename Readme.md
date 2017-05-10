@@ -9,11 +9,11 @@ by _Frost_, _Yiye_, and _Baojia_!
 ### 网络的建立
 faster-rcnn网络是一个经典的利用proposal和classification相结合实现物体识别的深度神经网络模型，其最大的特点就是在深度的网络层次上提取物体的位置（bbox）特征，并在深度层直接进行感兴趣区域的提取，和bbox的精确定位。
 
-![模型结构](AG_CapitalExclamation/img/Slide2.JPG)
+![模型结构](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/Slide2.JPG)
 
-![实际模型（tensorflow）](fork.png)
+![实际模型（tensorflow）](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/fork.png)
 
-![训练模型结构](AG_CapitalExclamation/img/Slide1.JPG)
+![训练模型结构](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/Slide1.JPG)
 
 ## 训练数据
 这部分的描述请参看文件：
