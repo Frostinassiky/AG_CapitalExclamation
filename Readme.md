@@ -111,7 +111,8 @@ https://drive.google.com/open?id=0B9Ti5uHc-pQ4Y2QyTURKRWZqQmc
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
 Wrote COCO eval results to: /home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/output/default/coco_2017_alpha/default/res101_faster_rcnn_iter_20000/detection_results.pkl
  ```
-参考：
+## 参考
+
 [1] Ren S, He K, Girshick R, et al. Faster r-cnn: Towards real-time object detection with region proposal networks[C]//Advances in neural information processing systems. 2015: 91-99.
 
 [2] Chen X, Gupta A. An implementation of faster rcnn with study for region sampling[J]. arXiv preprint arXiv:1702.02138, 2017.
@@ -121,5 +122,4 @@ Wrote COCO eval results to: /home/xum/Documents/Git/AlphaNext/AlphaModel/AG_Capi
 [4] Lin T Y, Maire M, Belongie S, et al. Microsoft coco: Common objects in context[C]//European Conference on Computer Vision. Springer International Publishing, 2014: 740-755.
 
 [5] Liu W, Anguelov D, Erhan D, et al. SSD: Single shot multibox detector[C]//European Conference on Computer Vision. Springer International Publishing, 2016: 21-37.
-[5] SSD
 
