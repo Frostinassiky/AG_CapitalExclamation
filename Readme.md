@@ -9,7 +9,11 @@ by _Frost_, _Yiye_, and _Baojia_!
 ### 网络的建立
 faster-rcnn网络是一个经典的利用proposal和classification相结合实现物体识别的深度神经网络模型，其最大的特点就是在深度的网络层次上提取物体的位置（bbox）特征，并在深度层直接进行感兴趣区域的提取，和bbox的精确定位。
 
- TODO
+![模型结构](AG_CapitalExclamation/img/Slide2.JPG)
+
+![实际模型（tensorflow）](fork.png)
+
+![训练模型结构](AG_CapitalExclamation/img/Slide1.JPG)
 
 ## 训练数据
 这部分的描述请参看文件：
@@ -69,7 +73,7 @@ https://drive.google.com/open?id=0B9Ti5uHc-pQ4Y2QyTURKRWZqQmc
   python tools/test.py --model res101_faster_rcnn_iter_20000.ckpt --imdb coco_style_face
    ```
 ### 程序输出
-
+```Shell
 ~~~~ Mean and per-category AP @ IoU=[0.50,0.95] ~~~~
 49.6
 39.5
@@ -89,3 +93,4 @@ https://drive.google.com/open?id=0B9Ti5uHc-pQ4Y2QyTURKRWZqQmc
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.604
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
 Wrote COCO eval results to: /home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/output/default/coco_2017_alpha/default/res101_faster_rcnn_iter_20000/detection_results.pkl
+ ```
