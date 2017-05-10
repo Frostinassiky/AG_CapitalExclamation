@@ -11,7 +11,7 @@ faster-rcnn网络是一个经典的利用proposal和classification相结合实�
 
 ![模型结构](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/Slide2.JPG)
 
-![实际模型（tensorflow）](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/fork.png)
+![实际模型（tensorflow）](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/fork_main.png)
 
 ![训练模型结构](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/Slide1.JPG)
 
