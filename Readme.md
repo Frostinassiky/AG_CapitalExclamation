@@ -1,7 +1,7 @@
 # [ AlphaGo！] 模型：ForkNet
 by _Frost_, _Yiye_, and _Baojia_!
 
-声明，该工作继承自_endernewton_的faster-rcnn框架，原来的链接可以参考 https://github.com/endernewton/tf-faster-rcnn
+声明，该工作继承自 _endernewton_ 的faster-rcnn框架，原来的链接可以参考 https://github.com/endernewton/tf-faster-rcnn
 
 ## 算法介绍
 该网络模型从faster-rcnn中进行改进，利用叉子状网络实现对性别的分类，和对帽子、口罩、以及眼镜的分类。
@@ -111,3 +111,15 @@ https://drive.google.com/open?id=0B9Ti5uHc-pQ4Y2QyTURKRWZqQmc
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
 Wrote COCO eval results to: /home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/output/default/coco_2017_alpha/default/res101_faster_rcnn_iter_20000/detection_results.pkl
  ```
+参考：
+[1] Ren S, He K, Girshick R, et al. Faster r-cnn: Towards real-time object detection with region proposal networks[C]//Advances in neural information processing systems. 2015: 91-99.
+
+[2] Chen X, Gupta A. An implementation of faster rcnn with study for region sampling[J]. arXiv preprint arXiv:1702.02138, 2017.
+
+[3] Yang S, Luo P, Loy C C, et al. Wider face: A face detection benchmark[C]//Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2016: 5525-5533.
+
+[4] Lin T Y, Maire M, Belongie S, et al. Microsoft coco: Common objects in context[C]//European Conference on Computer Vision. Springer International Publishing, 2014: 740-755.
+
+[5] Liu W, Anguelov D, Erhan D, et al. SSD: Single shot multibox detector[C]//European Conference on Computer Vision. Springer International Publishing, 2016: 21-37.
+[5] SSD
+
