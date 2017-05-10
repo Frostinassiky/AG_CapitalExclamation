@@ -18,7 +18,8 @@ proposals 用的是传统的ＲＰＮ网络．
 
 叉子的右边三支分别用于计算帽子\眼镜和口罩的分类．为了准确度，这三支同样加入了区域池化，在特征层当中截取可疑的区域进行计算．
 颜色判断的可疑区域不通过ＲＰＮ提供，而是根据人头的检测结果，自主设计了proposals的分布．该设计如下图所示，由于不需要给出这些物体的位置，我们采用了SSD类似的方式直接给出proposals
-![缺可疑区域设计]()
+
+![可疑区域设计](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/Presentation1.jpg)
 
 因此，使用该网络计算时相当于传播了两次，第一次得到性别信息和人头位置，第二轮根据人头位置和特征层对帽子眼镜口罩进行分类．
 
