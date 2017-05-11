@@ -1,10 +1,12 @@
 # [ AlphaGo！] 模型：ForkNet
 by _Frost_, _Yiye_, and _Baojia_!
 
-声明，该工作继承自 _endernewton_ 的faster-rcnn框架，原来的链接可以参考 https://github.com/endernewton/tf-faster-rcnn
+首先感谢 _endernewton_ 的工作，他将faster-rcnn的结构从复杂的caffe环境转移到了tensorflow上面。原来的链接可以参考 https://github.com/endernewton/tf-faster-rcnn
+
+
 
 ## 算法介绍
-该网络模型从faster-rcnn中进行改进，利用叉子状网络实现对性别的分类，和对帽子、口罩、以及眼镜的分类。
+该网络模型从faster-rcnn中进行改进，利用叉子状网络实现对性别的分类，之后进行对帽子、口罩、以及眼镜的分类。
 
 ### 网络的建立
 faster-rcnn网络是一个经典的利用proposal和classification相结合实现物体识别的深度神经网络模型，其最大的特点就是在深度的网络层次上提取物体的位置（bbox）特征，并在深度层直接进行感兴趣区域的提取，和bbox的精确定位。
@@ -34,7 +36,10 @@ proposals 用的是传统的ＲＰＮ网络．
 ![实际模型（tensorflow）](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/fork_main.png)
 
 ## 训练数据
-这部分的描述请参看Yiye的文件：
+
+这部分费了好大功夫，在比赛截止前三天才搞定。我们一共收集了8500张可使用的人的头像的图片，并调整为本次比赛要求的格式。 其中的6800张用微软的API进行了性别的标定，详细的见 _Preprocessing/uploadPicText.py_，剩余的1700张用了亚马逊的标定服务。~微软的这个API也不是很靠谱~，最后用了那1700张进行训练。
+
+这部分的详细描述请参看Yiye的文件：
 
 ## 模型参数
 训练20000次后的模型参数储存在：
