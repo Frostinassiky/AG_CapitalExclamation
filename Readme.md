@@ -47,10 +47,10 @@ https://drive.google.com/open?id=0B9Ti5uHc-pQ4Y2QyTURKRWZqQmc
 
 在测试阶段，模型的输入为一张图片。
 
-1. 图片信息通过需调整为112\*96大小。 详细见_Preprocessing\ProduceFace.m_
-2. 头部的位置信息是一个四维向量，格式是 _[x1,y1,x2,y2]_. 由于在WIDER FACE数据库中存放有头部位置，按照裁剪过程中的几何关系可以计算得出
-3. 帽子眼睛口罩的分类分别为三个0-13的整数，每个数字代表的含义在_Preprocessing\MergeInfo.m_中提及。
-4. 位置信息和分类信息整理后存为COCO数据库的格式，整理的代码为 Preprocessing/WriteJsonBbox.py，存放文件是https://drive.google.com/open?id=0B9Ti5uHc-pQ4cFY2SGpjUl9wTDA
+1. 图片信息通过需调整为112\*96大小。 详细见 _Preprocessing\ProduceFace.m_ 
+2. 头部的位置信息是一个四维向量，格式是 _[x1,y1,x2,y2]_ . 由于在WIDER FACE数据库中存放有头部位置，按照裁剪过程中的几何关系可以计算得出
+3. 帽子眼睛口罩的分类分别为三个0-13的整数，每个数字代表的含义在 _Preprocessing\MergeInfo.m_ 中提及。
+4. 位置信息和分类信息整理后存为COCO数据库的格式，整理的代码为 Preprocessing\WriteJsonBbox.py，存放文件是https://drive.google.com/open?id=0B9Ti5uHc-pQ4cFY2SGpjUl9wTDA
 
 
 ## 模型输出
@@ -114,7 +114,7 @@ Wrote COCO eval results to: /home/xum/Documents/Git/AlphaNext/AlphaModel/AG_Capi
  ```
  
 ## 理想输出结果
-在结束的前几天，这次竞赛组委会我们提供了578张图片作为测试数据，十分靠谱。虽然图片的计算结果不能通过我们的网络模型计算得到 ：(，但是由于在数据整理阶段准备的比较充分，我们也迅速拿到了这58张图片的真实值。这里的 **人工智能(AI)** 恐怕就要翻译成 **A** group of labour's **I**ntelligence (AI). LOL
+在结束的前几天，这次竞赛组委会我们提供了578张图片作为测试数据，十分靠谱。虽然图片的计算结果不能通过我们的网络模型计算得到 ：(，但是由于在数据整理阶段准备的比较充分，我们也迅速拿到了这58张图片的真实值。这里的 **人工智能(AI)** 恐怕就要翻译成 **A** group of labour's **I**ntelligence (AI)了. LOL
 
 
 ## 参考
