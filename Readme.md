@@ -30,7 +30,7 @@ proposals 用的是传统的ＲＰＮ网络．
 
 在整理数据的过程中，真实框的位置通过几何位置得到，用于训练颜色分类的网络。所以该叉状网络的训练可以同步进行．与之前不同，对剩余的三个分叉，由头的真实位置直接提供可疑区域的初值，进而在初值上通过SSD的方法计算proposals,而后分类．
 
-** 经过我们20多天的努力，模型的结构建立完成，但尚未完成剩余三个分叉的反向传播梯度，故无法进行整个模型的训练，十分可惜．好在模型的主干部分（第一个分叉）可以跑通，所以也决定上交。 **  在tensorboard中浏览到的模型主体部分如下图所示．[图片细节](/img/fork.png)中添加了共享的参数和链接．
+**经过我们20多天的努力，模型的结构建立完成，但尚未完成剩余三个分叉的反向传播梯度，故无法进行整个模型的训练，十分可惜．好在模型的主干部分（第一个分叉）可以跑通，所以也决定上交。**  在tensorboard中浏览到的模型主体部分如下图所示．[图片细节](/img/fork.png)中添加了共享的参数和链接．
 ![实际模型（tensorflow）](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/fork_main.png)
 
 ## 训练数据
@@ -113,8 +113,8 @@ https://drive.google.com/open?id=0B9Ti5uHc-pQ4Y2QyTURKRWZqQmc
 Wrote COCO eval results to: /home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/output/default/coco_2017_alpha/default/res101_faster_rcnn_iter_20000/detection_results.pkl
  ```
  
-### 理想输出结果
-在结束的前几天，这次竞赛组委会我们提供了578张图片作为测试数据，十分靠谱。虽然图片的计算结果不能通过我们的网络模型计算得到 ：(，但是由于在数据整理阶段准备的比较充分，我们也迅速拿到了这58张图片的真实值。这里的 ** 人工智能 ** 恐怕就要翻译成 ** A ** Group of labour's **I**ntelligence. LOL
+## 理想输出结果
+在结束的前几天，这次竞赛组委会我们提供了578张图片作为测试数据，十分靠谱。虽然图片的计算结果不能通过我们的网络模型计算得到 ：(，但是由于在数据整理阶段准备的比较充分，我们也迅速拿到了这58张图片的真实值。这里的 **人工智能** 恐怕就要翻译成 **A** Group of labour's **I**ntelligence. LOL
 
 
 ## 参考
