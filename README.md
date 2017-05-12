@@ -1,6 +1,8 @@
 # AlphaGo! model
 by _Frost_, _Yiye_, and _Baojia_!
-AlphaNext Code: https://github.com/Frostinassiky/AG_CapitalExclamation/tree/AlphaNext
+
+**AlphaNext Code: https://github.com/Frostinassiky/AG_CapitalExclamation/tree/AlphaNext**
+
 Devoloped from https://github.com/endernewton/tf-faster-rcnn
 
 ## Installation
