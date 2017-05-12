@@ -4,10 +4,10 @@ by _Yiye_, _Frost_, and _Baojia_!
 首先感谢 _endernewton_ 的工作，他将faster-rcnn的结构从复杂的caffe环境转移到了tensorflow上面。原来的链接可以参考 https://github.com/endernewton/tf-faster-rcnn
 
 ### 12日更新
-AlphaNext测试数据[**真实值**](/result)
+AlphaNext测试数据[**真实值**](/Result)
 
 ### 13日更新
-转换为标准格式[**真实值**](/result)
+转换为标准格式[**真实值**](/Result)
 
 ForkNet [训练数据](https://drive.google.com/open?id=0B9Ti5uHc-pQ4LWs0Nm02aVR6eGM)
 
