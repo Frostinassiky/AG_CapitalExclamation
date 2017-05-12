@@ -6,6 +6,9 @@ by _Yiye_, _Frost_, and _Baojia_!
 ### 12日更新
 AlphaNext测试数据[**真实值**](/result)
 
+### 13日更新
+转换为标准格式[**真实值**](/result)
+
 ForkNet [训练数据](https://drive.google.com/open?id=0B9Ti5uHc-pQ4LWs0Nm02aVR6eGM)
 
 ## 算法介绍
