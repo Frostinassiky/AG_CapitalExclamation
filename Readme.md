@@ -39,7 +39,7 @@ proposals 和传统的PRN网络完全相同．
 
 ## 训练数据收集和预处理
 
-这部分费了好大功夫，在比赛截止前三天才搞定。我们一共收集了8500张可使用的人的头像的图片，并调整为本次比赛要求的格式。 其中的6800张用微软的API进行了性别的标定，详细的见 _Preprocessing/uploadPicText.py_，剩余的1700张用了亚马逊的标定服务。~微软的这个API也不是很靠谱~，最后用了那1700张进行训练。
+这部分费了好大功夫，在比赛截止前三天才搞定。我们一共收集了8500张可使用的人的头像的图片[3]，并调整为本次比赛要求的格式。 其中的6800张用[微软的API](https://azure.microsoft.com/en-us/services/cognitive-services/face/)进行了性别的标定，详细的见 _Preprocessing/uploadPicText.py_，剩余的1700张用了亚马逊的标定服务。~微软的这个API也不是很靠谱~，最后用了那1700张进行训练。
 
 这部分的详细描述请参看 *Yiye*　的文件．该文件附在提交作品的邮箱中．
 
@@ -61,7 +61,7 @@ https://drive.google.com/open?id=0B9Ti5uHc-pQ4Y2QyTURKRWZqQmc
 1. 图片信息通过需调整为112\*96大小。 详细见 _Preprocessing\ProduceFace.m_ 
 2. 头部的位置信息是一个四维向量，格式是 _[x1,y1,x2,y2]_ . 由于在WIDER FACE数据库中存放有头部位置，按照裁剪过程中的几何关系可以计算得出
 3. 帽子眼睛口罩的分类分别为三个0-13的整数，每个数字代表的含义在 _Preprocessing\MergeInfo.m_ 中提及。
-4. 位置信息和分类信息整理后存为COCO数据库的格式，整理的代码为 _Preprocessing\WriteJsonBbox.py_，[存放文件](https://drive.google.com/open?id=0B9Ti5uHc-pQ4cFY2SGpjUl9wTDA)是https://drive.google.com/open?id=0B9Ti5uHc-pQ4cFY2SGpjUl9wTDA
+4. 位置信息和分类信息整理后存为COCO数据库[4] 的格式，整理的代码为 _Preprocessing\WriteJsonBbox.py_，[存放文件](https://drive.google.com/open?id=0B9Ti5uHc-pQ4cFY2SGpjUl9wTDA)是https://drive.google.com/open?id=0B9Ti5uHc-pQ4cFY2SGpjUl9wTDA
 
 
 ## 模型输出
