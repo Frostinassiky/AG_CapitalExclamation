@@ -1,4 +1,4 @@
-# [ AlphaGo！] 模型：ForkNet
+# [ 阿尔法Go！] 模型：ForkNet
 by _Frost_, _Yiye_, and _Baojia_!
 
 首先感谢 _endernewton_ 的工作，他将faster-rcnn的结构从复杂的caffe环境转移到了tensorflow上面。原来的链接可以参考 https://github.com/endernewton/tf-faster-rcnn
