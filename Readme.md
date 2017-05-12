@@ -5,7 +5,8 @@ by _Frost_, _Yiye_, and _Baojia_!
 
 ### 12日更新
 AlphaNext测试数据[**真实值**](/result)
-ForkNet 训练数据
+
+ForkNet [训练数据](https://drive.google.com/open?id=0B9Ti5uHc-pQ4LWs0Nm02aVR6eGM)
 
 ## 算法介绍
 该网络模型从faster-rcnn[1] 中进行改进，利用叉子状网络实现对性别的分类，之后进行对帽子、口罩、以及眼镜的分类。
@@ -15,7 +16,7 @@ faster-rcnn网络是一个经典的利用proposal和classification相结合实�
 
 深度学习网络结构如下图所示
 ![模型结构](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/Slide2.JPG)
-整体网络成叉子的形状，不妨称为ForkNet. 叉子手柄处为共用网络，用于从图片中提取低级特征．大部分参数集中在共用网络，也就是图中_多层全卷积网络_部分．利用ResNet的结构，共用网络将一个(1x112x96x3)的图片抽象为（1x14x12x64）的_特征层_．
+整体网络成叉子的形状，不妨称为ForkNet. 叉子手柄处为共用网络，用于从图片中提取低级特征．大部分参数集中在共用网络，也就是图中_多层全卷积网络_部分．利用ResNet的结构，共用网络将一个(1x112x96x3)的图片抽象为（1x14x12x64）的 _特征层_．
 
 叉子的最左边分支与传统的faster-rcnn一样，用４＊３个_anchor_计算可疑区域(proposals)后再分类,进一步确定框的位置．
 proposals 和传统的PRN网络完全相同．
@@ -28,7 +29,7 @@ proposals 和传统的PRN网络完全相同．
 因此，使用该网络计算时相当于传播了两次：第一次传播得到人物的性别信息和人头位置，第二次小循环根据人头位置和特征层对帽子眼镜口罩进行分类．
 
 ### 模型的训练
-直接用后向传播的方法计算梯度不适用于该模型．这是因为RPN提供的proposals本身就会有一定不准确性，使第一轮预测的误差直接影响第二轮结果．我们这里参考了[2]中四步训练法的简化方法，利用真实框的位置进行训练．训练中的模型如下图
+直接用后向传播的方法计算梯度不适用于该模型．这是因为RPN提供的proposals本身就会有一定不准确性，使第一轮预测的误差直接影响第二轮结果．我们这里参考了[2]中四步训练法的简化方法，利用真实框的位置进行训练．训练中的模型如下图.
 
 ![训练模型结构](https://raw.githubusercontent.com/Frostinassiky/AG_CapitalExclamation/AlphaNext/img/Slide1.JPG)
 
