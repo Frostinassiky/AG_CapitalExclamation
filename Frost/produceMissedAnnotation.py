@@ -6,11 +6,15 @@ import numpy as np
 import json
 import random
 import time
+if 1:
+    annotation_file = "/home/xum/Desktop/current/data/coco/annotations/~instances_train2014.json"
+    saved_file = "/home/xum/Desktop/current/data/coco/annotations/instances_train2014.json"
+else:
+    annotation_file = "/home/xum/Desktop/current/data/coco/annotations/~instances_minival2014.json"
+    saved_file = "/home/xum/Desktop/current/data/coco/annotations/instances_minival2014.json"
 
-annotation_file = "/home/xum/Desktop/current/data/coco/annotations/~instances_minival2014.json"
-saved_file = "/home/xum/Desktop/current/data/coco/annotations/missing_instances_minival2014.json"
-cls = [2,44,27]
-missing_rate =0.01
+cls = [3,44,84]
+missing_rate =0.00
 
 # load
 print('loading annotations into memory...')
@@ -97,6 +101,12 @@ for pict in dataset["images"]:
             images_3cls.append(pict)
             break
 
+# new categories
+new_cat = []
+for cat in dataset["categories"]:
+    if cat["id"]==cls[0] or cat["id"]==cls[1] or cat["id"]==cls[2]:
+        new_cat.append(cat)
+
 # delete missing label
 missed_index = []
 for k in range(0,missed_num):
@@ -110,7 +120,7 @@ dataset_3cls = {
     "images":images_3cls,
     "licenses":dataset["licenses"],
     "annotations":annotations_3cls,
-    "categories":dataset["categories"]
+    "categories":new_cat
 }
 
 # save
@@ -122,5 +132,5 @@ print("missing label file saved to " + saved_file)
 print("original annotation number: " , all_anna_num)
 print("missing rate: " , missing_rate)
 print("remaind annotation number: " , remaind_anna_num)
-
+print("Categories are: ", new_cat)
 
