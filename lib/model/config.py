@@ -25,13 +25,13 @@ __C.TRAIN.LEARNING_RATE = 0.001
 __C.TRAIN.MOMENTUM = 0.9
 
 # Weight decay, for regularization
-__C.TRAIN.WEIGHT_DECAY = 0.0005
+__C.TRAIN.WEIGHT_DECAY = 0.0001
 
 # Factor for reducing the learning rate
 __C.TRAIN.GAMMA = 0.1
 
 # Step size for reducing the learning rate, currently only support one step
-__C.TRAIN.STEPSIZE = 30000
+__C.TRAIN.STEPSIZE = [30000]
 
 # Iteration intervals for showing the loss during training, on command line interface
 __C.TRAIN.DISPLAY = 10
@@ -58,7 +58,7 @@ __C.TRAIN.SNAPSHOT_KEPT = 3
 # The time interval for saving tensorflow summaries
 __C.TRAIN.SUMMARY_INTERVAL = 180
 
-# Scale to use during training (can NOT list multiple scales)
+# Scale to use during training (can list multiple scales)
 # The scale is the pixel size of an image's shortest side
 __C.TRAIN.SCALES = (600,)
 
@@ -98,20 +98,19 @@ __C.TRAIN.SNAPSHOT_ITERS = 5000
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
 __C.TRAIN.SNAPSHOT_PREFIX = 'res101_faster_rcnn'
-# __C.TRAIN.SNAPSHOT_INFIX = ''
-
-# Use a prefetch thread in roi_data_layer.layer
-# So far I haven't found this useful; likely more engineering work is required
-# __C.TRAIN.USE_PREFETCH = False
 
 # Normalize the targets (subtract empirical mean, divide by empirical stddev)
 __C.TRAIN.BBOX_NORMALIZE_TARGETS = True
+
 # Deprecated (inside weights)
 __C.TRAIN.BBOX_INSIDE_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
+
 # Normalize the targets using "precomputed" (or made up) means and stdevs
 # (BBOX_NORMALIZE_TARGETS must also be True)
 __C.TRAIN.BBOX_NORMALIZE_TARGETS_PRECOMPUTED = True
+
 __C.TRAIN.BBOX_NORMALIZE_MEANS = (0.0, 0.0, 0.0, 0.0)
+
 __C.TRAIN.BBOX_NORMALIZE_STDS = (0.1, 0.1, 0.2, 0.2)
 
 # Train using these proposals
@@ -122,31 +121,40 @@ __C.TRAIN.PROPOSAL_METHOD = 'gt'
 # on zero-padding.
 
 # Use RPN to detect objects
-__C.TRAIN.HAS_RPN = False
+__C.TRAIN.HAS_RPN = True
+
 # IOU >= thresh: positive example
 __C.TRAIN.RPN_POSITIVE_OVERLAP = 0.7
+
 # IOU < thresh: negative example
 __C.TRAIN.RPN_NEGATIVE_OVERLAP = 0.3
-# If an anchor statisfied by positive and negative conditions set to negative
+
+# If an anchor satisfied by positive and negative conditions set to negative
 __C.TRAIN.RPN_CLOBBER_POSITIVES = False
+
 # Max number of foreground examples
 __C.TRAIN.RPN_FG_FRACTION = 0.5
+
 # Total number of examples
 __C.TRAIN.RPN_BATCHSIZE = 256
+
 # NMS threshold used on RPN proposals
 __C.TRAIN.RPN_NMS_THRESH = 0.7
+
 # Number of top scoring boxes to keep before apply NMS to RPN proposals
 __C.TRAIN.RPN_PRE_NMS_TOP_N = 12000
+
 # Number of top scoring boxes to keep after applying NMS to RPN proposals
 __C.TRAIN.RPN_POST_NMS_TOP_N = 2000
-# Proposal height and width both need to be greater than RPN_MIN_SIZE (at orig image scale)
-# __C.TRAIN.RPN_MIN_SIZE = 16
+
 # Deprecated (outside weights)
 __C.TRAIN.RPN_BBOX_INSIDE_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
+
 # Give the positive RPN examples weight of p * 1 / {num positives}
 # and give negatives a weight of (1 - p)
 # Set to -1.0 to use uniform example weighting
 __C.TRAIN.RPN_POSITIVE_WEIGHT = -1.0
+
 # Whether to use all ground truth bounding boxes for training, 
 # For COCO, setting USE_ALL_GT to False will exclude boxes that are flagged as ''iscrowd''
 __C.TRAIN.USE_ALL_GT = True
@@ -182,10 +190,11 @@ __C.TEST.PROPOSAL_METHOD = 'gt'
 
 ## NMS threshold used on RPN proposals
 __C.TEST.RPN_NMS_THRESH = 0.7
-## Number of top scoring boxes to keep before apply NMS to RPN proposals
+
+# Number of top scoring boxes to keep before apply NMS to RPN proposals
 __C.TEST.RPN_PRE_NMS_TOP_N = 6000
 
-## Number of top scoring boxes to keep after applying NMS to RPN proposals
+# Number of top scoring boxes to keep after applying NMS to RPN proposals
 __C.TEST.RPN_POST_NMS_TOP_N = 300
 
 # Proposal height and width both need to be greater than RPN_MIN_SIZE (at orig image scale)
@@ -205,28 +214,37 @@ __C.TEST.RPN_TOP_N = 5000
 __C.RESNET = edict()
 
 # Option to set if max-pooling is appended after crop_and_resize. 
-# if true, the region will be resized to a squre of 2xPOOLING_SIZE, 
+# if true, the region will be resized to a square of 2xPOOLING_SIZE, 
 # then 2x2 max-pooling is applied; otherwise the region will be directly
 # resized to a square of POOLING_SIZE
 __C.RESNET.MAX_POOL = False
 
-# Number of fixed blocks during finetuning, by default the first of all 4 blocks is fixed
+# Number of fixed blocks during training, by default the first of all 4 blocks is fixed
 # Range: 0 (none) to 3 (all)
 __C.RESNET.FIXED_BLOCKS = 1
 
-# Whether to tune the batch nomalization parameters during training
-__C.RESNET.BN_TRAIN = False
+#
+# MobileNet options
+#
+
+__C.MOBILENET = edict()
+
+# Whether to regularize the depth-wise filters during training
+__C.MOBILENET.REGU_DEPTH = False
+
+# Number of fixed layers during training, by default the bottom 5 of 14 layers is fixed
+# Range: 0 (none) to 12 (all)
+__C.MOBILENET.FIXED_LAYERS = 5
+
+# Weight decay for the mobilenet weights
+__C.MOBILENET.WEIGHT_DECAY = 0.00004
+
+# Depth multiplier
+__C.MOBILENET.DEPTH_MULTIPLIER = 1.
 
 #
 # MISC
 #
-
-# The mapping from image coordinates to feature map coordinates might cause
-# some boxes that are distinct in image space to become identical in feature
-# coordinates. If DEDUP_BOXES > 0, then DEDUP_BOXES is used as the scale factor
-# for identifying duplicate boxes.
-# 1/16 is correct for {Alex,Caffe}Net, VGG_CNN_M_1024, and VGG16
-__C.DEDUP_BOXES = 1. / 16.
 
 # Pixel mean values (BGR order) as a (1, 1, 3) array
 # We use the same pixel mean for all networks even though it's not exactly what
@@ -235,9 +253,6 @@ __C.PIXEL_MEANS = np.array([[[102.9801, 115.9465, 122.7717]]])
 
 # For reproducibility
 __C.RNG_SEED = 3
-
-# A small number that's used many times
-__C.EPS = 1e-14
 
 # Root directory of project
 __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
@@ -254,9 +269,6 @@ __C.EXP_DIR = 'default'
 # Use GPU implementation of non-maximum suppression
 __C.USE_GPU_NMS = True
 
-# Default GPU device id
-__C.GPU_ID = 0
-
 # Default pooling mode, only 'crop' is available
 __C.POOLING_MODE = 'crop'
 
@@ -268,6 +280,9 @@ __C.ANCHOR_SCALES = [8,16,32]
 
 # Anchor ratios for RPN
 __C.ANCHOR_RATIOS = [0.5,1,2]
+
+# Number of filters for the RPN layer
+__C.RPN_CHANNELS = 512
 
 
 def get_output_dir(imdb, weights_filename):

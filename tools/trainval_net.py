@@ -19,8 +19,8 @@ import sys
 
 import tensorflow as tf
 from nets.vgg16 import vgg16
-from nets.forknet import resnetv1
-#from nets.resnet_v2 import resnetv1
+from nets.resnet_v1 import resnetv1
+from nets.mobilenet_v1 import mobilenetv1
 
 def parse_args():
   """
@@ -29,40 +29,32 @@ def parse_args():
   parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
   parser.add_argument('--cfg', dest='cfg_file',
                       help='optional config file',
-                      default="/home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/experiments/cfgs/res101.yml",
-                      type=str)
+                      default=None, type=str)
   parser.add_argument('--weight', dest='weight',
                       help='initialize with pretrained model weights',
-                      default = "/home/xum/Documents/Git/AlphaNext/AlphaModel/AG_CapitalExclamation/data/imagenet_weights/res101.ckpt",
                       type=str)
   parser.add_argument('--imdb', dest='imdb_name',
                       help='dataset to train on',
-                      #default='coco_2014_train',
-                      default='coco_style_fish',
-                      #default='coco_style_face',
-                      type=str)
+                      default='voc_2007_trainval', type=str)
   parser.add_argument('--imdbval', dest='imdbval_name',
                       help='dataset to validate on',
-                      #default='coco_2014_minival',
-                      default='coco_style_fish',
-                      #default='coco_style_face',
-                      type=str)
+                      default='voc_2007_test', type=str)
   parser.add_argument('--iters', dest='max_iters',
                       help='number of iterations to train',
-                      default=20000, type=int)
+                      default=70000, type=int)
   parser.add_argument('--tag', dest='tag',
                       help='tag of the model',
                       default=None, type=str)
   parser.add_argument('--net', dest='net',
-                      help='vgg16, res50, res101, res152',
-                      default='res101', type=str)
+                      help='vgg16, res50, res101, res152, mobile',
+                      default='res50', type=str)
   parser.add_argument('--set', dest='set_cfgs',
-                      help='set config keys', default=['ANCHOR_SCALES', "[4,8,16,32]", 'ANCHOR_RATIOS' ,"[0.5,1,2]", 'TRAIN.STEPSIZE', 350000],
+                      help='set config keys', default=None,
                       nargs=argparse.REMAINDER)
 
   if len(sys.argv) == 1:
     parser.print_help()
-    # sys.exit(1)
+    sys.exit(1)
 
   args = parser.parse_args()
   return args
@@ -130,13 +122,15 @@ if __name__ == '__main__':
 
   # load network
   if args.net == 'vgg16':
-    net = vgg16(batch_size=cfg.TRAIN.IMS_PER_BATCH)
+    net = vgg16()
   elif args.net == 'res50':
-    net = resnetv1(batch_size=cfg.TRAIN.IMS_PER_BATCH, num_layers=50)
+    net = resnetv1(num_layers=50)
   elif args.net == 'res101':
-    net = resnetv1(batch_size=cfg.TRAIN.IMS_PER_BATCH, num_layers=101)
+    net = resnetv1(num_layers=101)
   elif args.net == 'res152':
-    net = resnetv1(batch_size=cfg.TRAIN.IMS_PER_BATCH, num_layers=152)
+    net = resnetv1(num_layers=152)
+  elif args.net == 'mobile':
+    net = mobilenetv1()
   else:
     raise NotImplementedError
     

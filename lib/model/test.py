@@ -17,12 +17,11 @@ import os
 import math
 
 from utils.timer import Timer
-from utils.cython_nms import nms, nms_new
-from utils.boxes_grid import get_boxes_grid
 from utils.blob import im_list_to_blob
 
 from model.config import cfg, get_output_dir
 from model.bbox_transform import clip_boxes, bbox_transform_inv
+from model.nms_wrapper import nms
 
 def _get_image_blob(im):
   """Converts an image into a network input.
@@ -89,14 +88,11 @@ def im_detect(sess, net, im):
   assert len(im_scales) == 1, "Only single-image batch implemented"
 
   im_blob = blobs['data']
-  # seems to have height, width, and image scales
-  # still not sure about the scale, maybe full image it is 1.
-  blobs['im_info'] = np.array([[im_blob.shape[1], im_blob.shape[2], im_scales[0]]], dtype=np.float32)
+  blobs['im_info'] = np.array([im_blob.shape[1], im_blob.shape[2], im_scales[0]], dtype=np.float32)
 
   _, scores, bbox_pred, rois = net.test_image(sess, blobs['data'], blobs['im_info'])
   
   boxes = rois[:, 1:5] / im_scales[0]
-  # print(scores.shape, bbox_pred.shape, rois.shape, boxes.shape)
   scores = np.reshape(scores, [scores.shape[0], -1])
   bbox_pred = np.reshape(bbox_pred, [bbox_pred.shape[0], -1])
   if cfg.TEST.BBOX_REG:
@@ -128,7 +124,7 @@ def apply_nms(all_boxes, thresh):
       x2 = dets[:, 2]
       y2 = dets[:, 3]
       scores = dets[:, 4]
-      inds = np.where((x2 > x1) & (y2 > y1) & (scores > cfg.TEST.DET_THRESHOLD))[0]
+      inds = np.where((x2 > x1) & (y2 > y1))[0]
       dets = dets[inds,:]
       if dets == []:
         continue
@@ -139,7 +135,7 @@ def apply_nms(all_boxes, thresh):
       nms_boxes[cls_ind][im_ind] = dets[keep, :].copy()
   return nms_boxes
 
-def test_net(sess, net, imdb, weights_filename, max_per_image=100, thresh=0.05):
+def test_net(sess, net, imdb, weights_filename, max_per_image=100, thresh=0.):
   np.random.seed(cfg.RNG_SEED)
   """Test a Fast R-CNN network on an image database."""
   num_images = len(imdb.image_index)

@@ -36,16 +36,7 @@ case ${DATASET} in
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
-  fish)
-    TRAIN_IMDB="coco_style_fish"
-    TEST_IMDB="coco_style_fish"
-    STEPSIZE=7000
-    ITERS=10000
-    ANCHORS="[4,8,16,32]"
-    RATIOS="[0.5,1,2]"
-    ;;
   *)
-    echo ${DATASET}
     echo "No dataset given"
     exit
     ;;
@@ -70,13 +61,15 @@ if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
     --cfg experiments/cfgs/${NET}.yml \
     --tag ${EXTRA_ARGS_SLUG} \
     --net ${NET} \
-    --set ANCHOR_SCALES ${ANCHORS} ANCHOR_RATIOS ${RATIOS} ${EXTRA_ARGS}
+    --set ANCHOR_SCALES ${ANCHORS} ANCHOR_RATIOS ${RATIOS} \
+          ${EXTRA_ARGS}
 else
   CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/test_net.py \
     --imdb ${TEST_IMDB} \
     --model ${NET_FINAL} \
     --cfg experiments/cfgs/${NET}.yml \
     --net ${NET} \
-    --set ANCHOR_SCALES ${ANCHORS} ANCHOR_RATIOS ${RATIOS} ${EXTRA_ARGS}
+    --set ANCHOR_SCALES ${ANCHORS} ANCHOR_RATIOS ${RATIOS} \
+          ${EXTRA_ARGS}
 fi
 

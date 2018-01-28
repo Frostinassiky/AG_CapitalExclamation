@@ -13,6 +13,3 @@ add_path(lib_path)
 
 coco_path = osp.join(this_dir, '..', 'data', 'coco', 'PythonAPI')
 add_path(coco_path)
-
-edgebox_path = osp.join(this_dir, 'edge_boxes_with_python')
-add_path(edgebox_path)

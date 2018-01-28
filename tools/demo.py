@@ -17,7 +17,7 @@ from __future__ import print_function
 
 import _init_paths
 from model.config import cfg
-from model.test_vgg16 import im_detect
+from model.test import im_detect
 from model.nms_wrapper import nms
 
 from utils.timer import Timer
@@ -123,8 +123,7 @@ if __name__ == '__main__':
 
     if not os.path.isfile(tfmodel + '.meta'):
         raise IOError(('{:s} not found.\nDid you download the proper networks from '
-                       'our server and place them properly? If you want something '
-                       'simple and handy, try ./tools/demo_depre.py first.').format(tfmodel + '.meta'))
+                       'our server and place them properly?').format(tfmodel + '.meta'))
 
     # set config
     tfconfig = tf.ConfigProto(allow_soft_placement=True)
@@ -134,12 +133,12 @@ if __name__ == '__main__':
     sess = tf.Session(config=tfconfig)
     # load network
     if demonet == 'vgg16':
-        net = vgg16(batch_size=1)
+        net = vgg16()
     elif demonet == 'res101':
-        net = resnetv1(batch_size=1, num_layers=101)
+        net = resnetv1(num_layers=101)
     else:
         raise NotImplementedError
-    net.create_architecture(sess, "TEST", 21,
+    net.create_architecture("TEST", 21,
                           tag='default', anchor_scales=[8, 16, 32])
     saver = tf.train.Saver()
     saver.restore(sess, tfmodel)
