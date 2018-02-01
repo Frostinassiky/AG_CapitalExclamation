@@ -126,8 +126,8 @@ class pascal_voc(imdb):
 
                 gt_classes = np.concatenate((gt1['gt_classes'], gt2['gt_classes']), axis=0)
 
-                is_pseudo = np.concatenate((np.ones(gt1['boxes'].shape), np.zeros(gt2['boxes'].shape)), axis=0)
-                not_pseudo = np.concatenate((np.zeros(gt1['boxes'].shape), np.ones(gt2['boxes'].shape)), axis=0)
+                is_pseudo = np.concatenate((np.ones(gt1['gt_classes'].shape), np.zeros(gt2['gt_classes'].shape)), axis=0)
+                # not_pseudo = np.concatenate((np.zeros(gt1['boxes'].shape), np.ones(gt2['boxes'].shape)), axis=0)
 
                 overlaps = vstack([gt1['gt_overlaps'], gt2['gt_overlaps']]).todense()
                 overlaps = scipy.sparse.csr_matrix(overlaps)
@@ -136,8 +136,8 @@ class pascal_voc(imdb):
                         'gt_classes': gt_classes,
                         'gt_overlaps': overlaps,
                         'flipped': False,
-                        'pseudo': is_pseudo,
-                        'not_pseudo': not_pseudo}
+                        'pseudo': is_pseudo}
+                        #'not_pseudo': not_pseudo}
 
             gt_roidb_mat = self._load_annotation(self.image_index)
             gt_roidb_xml = [self._load_pascal_annotation(index)
@@ -266,12 +266,16 @@ class pascal_voc(imdb):
             seg_areas[ix] = (x2 - x1 + 1) * (y2 - y1 + 1)
 
         overlaps = scipy.sparse.csr_matrix(overlaps)
+        is_pseudo = np.zeros(gt_classes.shape)
+        not_pseudo = np.ones(boxes.shape),
 
         return {'boxes': boxes,
                 'gt_classes': gt_classes,
                 'gt_overlaps': overlaps,
                 'flipped': False,
-                'seg_areas': seg_areas}
+                'seg_areas': seg_areas,
+                'pseudo': is_pseudo}
+                # 'not_pseudo': not_pseudo}
 
     def _get_comp_id(self):
         comp_id = (self._comp_id + '_' + self._salt if self.config['use_salt']

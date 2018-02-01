@@ -244,6 +244,8 @@ class SolverWrapper(object):
     self.data_layer = RoIDataLayer(self.roidb, self.imdb.num_classes)
     self.data_layer_val = RoIDataLayer(self.valroidb, self.imdb.num_classes, random=True)
 
+    # print('247:', self.roidb[0])
+    # print('248:', self.data_layer._roidb[0])
     # Construct the computation graph
     lr, train_op = self.construct_graph(sess)
 
@@ -276,7 +278,7 @@ class SolverWrapper(object):
       timer.tic()
       # Get training data, one batch at a time
       blobs = self.data_layer.forward()
-
+      #print('282:', blobs.keys())
       now = time.time()
       if iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
         # Compute the graph with summary

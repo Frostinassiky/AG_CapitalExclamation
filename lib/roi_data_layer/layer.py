@@ -78,8 +78,11 @@ class RoIDataLayer(object):
     If cfg.TRAIN.USE_PREFETCH is True, then blobs will be computed in a
     separate process and made available through self._blob_queue.
     """
+    # print('81:1', self._roidb[1].keys())
     db_inds = self._get_next_minibatch_inds()
+    # print(db_inds)
     minibatch_db = [self._roidb[i] for i in db_inds]
+    # print('85:db_inds', self._roidb[db_inds[0]].keys())
     return get_minibatch(minibatch_db, self._num_classes)
       
   def forward(self):
