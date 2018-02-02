@@ -229,10 +229,12 @@ class Network(object):
             # region classification
             cls_prob, bbox_pred = self._region_classification(fc7, is_training,
                                                               initializer, initializer_bbox)
+            # label
+            label_score, proposal_score = self._MIDN(fc7, is_training, initializer)
 
         self._score_summaries.update(self._predictions)
 
-        return rois, cls_prob, bbox_pred
+        return rois, cls_prob, bbox_pred, label_score
 
     def _smooth_l1_loss(self, bbox_pred, bbox_targets, bbox_inside_weights, bbox_outside_weights, sigma=1.0, dim=[1], pseudo=None):
         sigma_2 = sigma ** 2
@@ -276,21 +278,38 @@ class Network(object):
             cross_entropy = tf.reduce_mean(
                 tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cls_score, labels=label))
 
+            # RCNN, label loss
+            '''
+            cls_score2 = cls_score[:, 1:]  # drop background
+            x1 = tf.nn.softmax(cls_score2, name="label_x1")
+            x2 = tf.nn.softmax(tf.transpose(cls_score2), name="label_x2")
+            x2 = tf.transpose(x2)
+            x = tf.multiply(x1, x2, name='proposal_score')
+            lb_score = tf.reshape(tf.reduce_sum(x, 0), (1,20))
+            '''
+            # print(lb_score.get_shape())
+            # print(self._label[:, 1:].get_shape())
+            # print(x2.get_shape())
+            lb_score = self._predictions["lb_score"]
+            label_loss = 0.2*tf.reduce_mean(
+                tf.losses.log_loss(lb_score, self._label[:, 1:]))
+
             # RCNN, bbox loss
             # if the pseudo box is used, the bbox_targets is itself (zero loss)
-            bbox_pseudo =  self._proposal_targets['pseudo']
+            bbox_pseudo = self._proposal_targets['pseudo']
             bbox_pred = self._predictions['bbox_pred']
             bbox_targets = self._proposal_targets['bbox_targets'] #* (1 - bbox_pseudo) + bbox_pred * bbox_pseudo
             bbox_inside_weights = self._proposal_targets['bbox_inside_weights']
             bbox_outside_weights = self._proposal_targets['bbox_outside_weights']
             loss_box = self._smooth_l1_loss(bbox_pred, bbox_targets, bbox_inside_weights, bbox_outside_weights, pseudo=bbox_pseudo)
 
+            self._losses['label_loss'] = label_loss
             self._losses['cross_entropy'] = cross_entropy
             self._losses['loss_box'] = loss_box
             self._losses['rpn_cross_entropy'] = rpn_cross_entropy
             self._losses['rpn_loss_box'] = rpn_loss_box
 
-            loss = cross_entropy + loss_box + rpn_cross_entropy + rpn_loss_box
+            loss = cross_entropy + loss_box + rpn_cross_entropy + rpn_loss_box + label_loss
             regularization_loss = tf.add_n(tf.losses.get_regularization_losses(), 'regu')
             self._losses['total_loss'] = loss + regularization_loss
 
@@ -354,6 +373,103 @@ class Network(object):
         self._predictions["bbox_pred"] = bbox_pred
 
         return cls_prob, bbox_pred
+    def _MIDN(self, fc7, is_training, initializer):
+        x1s = slim.fully_connected(fc7, self._num_classes-1,
+                                         weights_initializer=initializer,
+                                         trainable=is_training,
+                                         activation_fn=None, scope='cls_lb_score')
+        x2s = slim.fully_connected(fc7, self._num_classes-1,
+                                         weights_initializer=initializer,
+                                         trainable=is_training,
+                                         activation_fn=None, scope='prop_lb_score')
+        x1 = tf.nn.softmax(x1s, name="label_x1")
+        x2 = tf.nn.softmax(tf.transpose(x2s), name="label_x2")
+        x2 = tf.transpose(x2)
+        proposal_score = tf.multiply(x1, x2, name='proposal_score')
+        lb_score = tf.reshape(tf.reduce_sum(proposal_score, 0), (1, self._num_classes-1))
+        self._predictions["lb_score"] = lb_score
+        return lb_score, proposal_score
+
+    def _SOICR(self, fc7, proposal_score, is_training, initializer, initializer_bbox):
+        # from pengpeng tang
+        from utils.cython_bbox import bbox_overlaps
+        DEBUG = False
+        def _get_highest_score_proposals(boxes, cls_prob, im_labels):
+            """Get proposals with highest score."""
+
+            num_images, num_classes = im_labels.shape
+            assert num_images == 1, 'batch size shoud be equal to 1'
+            im_labels_tmp = im_labels[0, :]
+            gt_boxes = np.zeros((0, 4), dtype=np.float32)
+            gt_classes = np.zeros((0, 1), dtype=np.int32)
+            gt_scores = np.zeros((0, 1), dtype=np.float32)
+            for i in xrange(num_classes):
+                if im_labels_tmp[i] == 1:
+                    cls_prob_tmp = cls_prob[:, i].copy()
+                    max_index = np.argmax(cls_prob_tmp)
+
+                    if DEBUG:
+                        print('max_index:', max_index, 'cls_prob_tmp:', cls_prob_tmp[max_index])
+
+                    gt_boxes = np.vstack((gt_boxes, boxes[max_index, :].reshape(1, -1)))
+                    gt_classes = np.vstack((gt_classes, (i + 1) * np.ones((1, 1), dtype=np.int32)))
+                    gt_scores = np.vstack((gt_scores,
+                                           cls_prob_tmp[max_index] * np.ones((1, 1), dtype=np.float32)))
+                    cls_prob[max_index, :] = 0
+
+            proposals = {'gt_boxes': gt_boxes,
+                         'gt_classes': gt_classes,
+                         'gt_scores': gt_scores}
+
+            return proposals
+
+        def _sample_rois(all_rois, proposals, num_classes):
+            """Generate a random sample of RoIs comprising foreground and background
+            examples.
+            """
+            # overlaps: (rois x gt_boxes)
+            gt_boxes = proposals['gt_boxes']
+            gt_labels = proposals['gt_classes']
+            gt_scores = proposals['gt_scores']
+            overlaps = bbox_overlaps(
+                np.ascontiguousarray(all_rois, dtype=np.float),
+                np.ascontiguousarray(gt_boxes, dtype=np.float))
+            gt_assignment = overlaps.argmax(axis=1)
+            max_overlaps = overlaps.max(axis=1)
+            labels = gt_labels[gt_assignment, 0]
+            cls_loss_weights = gt_scores[gt_assignment, 0]
+
+            # Select foreground RoIs as those with >= FG_THRESH overlap
+            fg_inds = np.where(max_overlaps >= cfg.TRAIN.FG_THRESH)[0]
+
+            # Select background RoIs as those within [BG_THRESH_LO, BG_THRESH_HI)
+            bg_inds = np.where(max_overlaps < cfg.TRAIN.FG_THRESH)[0]
+
+            if DEBUG:
+                print("number of fg:", len(fg_inds), 'number of bg:', len(bg_inds))
+
+            labels[bg_inds] = 0
+
+            rois = all_rois
+
+            return labels, rois, cls_loss_weights
+
+        boxes = self._predictions["rpn_bbox_pred"]
+        cls_prob = proposal_score  # midn_prob
+        im_labels = self._label
+
+        proposals = _get_highest_score_proposals(boxes, cls_prob, im_labels)
+        labels, rois, cls_loss_weights = _sample_rois(boxes, proposals, self._num_classes)
+        assert rois.shape[0] == boxes.shape[0]
+
+        # ic_score
+        ic_score = slim.fully_connected(fc7, self._num_classes-1,
+                                         weights_initializer=initializer,
+                                         trainable=is_training,
+                                         activation_fn=None, scope='ic_score')
+        ic_prob = tf.nn.softmax(ic_score, name="label_x1")
+        loss_oicr = tf.losses.softmax_cross_entropy(ic_score, labels, cls_loss_weights)
+        self._predictions["soicr"] = self._predictions["soicr"] + loss_oicr
 
     def _image_to_head(self, is_training, reuse=None):
         raise NotImplementedError
@@ -367,6 +483,8 @@ class Network(object):
         self._im_info = tf.placeholder(tf.float32, shape=[3])
         self._gt_boxes = tf.placeholder(tf.float32, shape=[None, 5])
         self._pseudo = tf.placeholder(tf.float32, shape=[None, 1])
+        self._label = tf.placeholder(tf.float32, shape=[1, 21])
+
         self._tag = tag
 
         self._num_classes = num_classes
@@ -397,7 +515,7 @@ class Network(object):
                        weights_regularizer=weights_regularizer,
                        biases_regularizer=biases_regularizer,
                        biases_initializer=tf.constant_initializer(0.0)):
-            rois, cls_prob, bbox_pred = self._build_network(training)
+            rois, cls_prob, bbox_pred, label_score = self._build_network(training)
 
         layers_to_output = {'rois': rois}
 
@@ -460,7 +578,8 @@ class Network(object):
     def get_summary(self, sess, blobs):
         p = blobs['pseudo'].reshape(len(blobs['pseudo']), 1)
         feed_dict = {self._image: blobs['data'], self._im_info: blobs['im_info'],
-                     self._gt_boxes: blobs['gt_boxes'], self._pseudo: p}
+                     self._gt_boxes: blobs['gt_boxes'],
+                     self._pseudo: p, self._label: blobs['label']}
         summary = sess.run(self._summary_op_val, feed_dict=feed_dict)
 
         return summary
@@ -469,30 +588,33 @@ class Network(object):
         # print(blobs['pseudo'].shape)
         p = blobs['pseudo'].reshape(len(blobs['pseudo']), 1)
         feed_dict = {self._image: blobs['data'], self._im_info: blobs['im_info'],
-                     self._gt_boxes: blobs['gt_boxes'], self._pseudo: p}
+                     self._gt_boxes: blobs['gt_boxes'], self._pseudo: p, self._label: blobs['label']}
         # print('469:',blobs['pseudo'].shape)
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, _ = sess.run([self._losses["rpn_cross_entropy"],
+        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, loss, _ = sess.run([self._losses["rpn_cross_entropy"],
                                                                             self._losses['rpn_loss_box'],
                                                                             self._losses['cross_entropy'],
                                                                             self._losses['loss_box'],
+                                                                            self._losses['label_loss'],
                                                                             self._losses['total_loss'],
                                                                             train_op],
-                                                                           feed_dict=feed_dict)
-        return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss
+                                                                            feed_dict=feed_dict)
+        return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, loss
 
     def train_step_with_summary(self, sess, blobs, train_op):
         p = blobs['pseudo'].reshape(len(blobs['pseudo']), 1)
         feed_dict = {self._image: blobs['data'], self._im_info: blobs['im_info'],
-                     self._gt_boxes: blobs['gt_boxes'], self._pseudo: p}
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, summary, _ = sess.run([self._losses["rpn_cross_entropy"],
+                     self._gt_boxes: blobs['gt_boxes'],
+                     self._pseudo: p, self._label: blobs['label']}
+        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, loss, summary, _ = sess.run([self._losses["rpn_cross_entropy"],
                                                                                      self._losses['rpn_loss_box'],
                                                                                      self._losses['cross_entropy'],
                                                                                      self._losses['loss_box'],
+                                                                                     self._losses['label_loss'],
                                                                                      self._losses['total_loss'],
                                                                                      self._summary_op,
                                                                                      train_op],
                                                                                     feed_dict=feed_dict)
-        return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, summary
+        return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, loss, summary
 
     def train_step_no_return(self, sess, blobs, train_op):
         feed_dict = {self._image: blobs['data'], self._im_info: blobs['im_info'],

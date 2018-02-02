@@ -49,10 +49,10 @@ def get_minibatch(roidb, num_classes):
     [im_blob.shape[1], im_blob.shape[2], im_scales[0]],
     dtype=np.float32)
 
-  # pseudo
+  # pseudo and label
   # print(roidb[0])
-  blobs['pseudo'] =roidb[0]['pseudo']
-
+  blobs['pseudo'] = roidb[0]['pseudo']
+  blobs['label'] = roidb[0]['label']
   return blobs
 
 def _get_image_blob(roidb, scale_inds):

@@ -121,6 +121,7 @@ class imdb(object):
                'gt_classes': self.roidb[i]['gt_classes'],
                'flipped': True,
                'pseudo': self.roidb[i]['pseudo'],
+               'label': self.roidb[i]['label'],
                #'not_pseudo': self.roidb[i]['not_pseudo'],
 
                }

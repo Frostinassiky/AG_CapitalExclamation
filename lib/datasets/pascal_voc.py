@@ -3,7 +3,9 @@
 # Copyright (c) 2015 Microsoft
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ross Girshick and Xinlei Chen
+# Modified by Frost
 # --------------------------------------------------------
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -59,6 +61,10 @@ class pascal_voc(imdb):
             'VOCdevkit path does not exist: {}'.format(self._devkit_path)
         assert os.path.exists(self._data_path), \
             'Path does not exist: {}'.format(self._data_path)
+
+        # image-level labels
+        self._image_label_txt = []
+
 
     def image_path_at(self, i):
         """
@@ -117,6 +123,7 @@ class pascal_voc(imdb):
             gt_roidb_xml = [self._load_pascal_annotation(index)
                         for index in self.image_index]
 
+
             gt_roidb = []
 
             def combine_gts(gt1, gt2):
@@ -131,19 +138,17 @@ class pascal_voc(imdb):
 
                 overlaps = vstack([gt1['gt_overlaps'], gt2['gt_overlaps']]).todense()
                 overlaps = scipy.sparse.csr_matrix(overlaps)
-                return {'boxes': boxes,
-                        #'boxes_vis': boxes_vis,
-                        'gt_classes': gt_classes,
-                        'gt_overlaps': overlaps,
-                        'flipped': False,
-                        'pseudo': is_pseudo}
-                        #'not_pseudo': not_pseudo}
+                return dict(boxes=boxes,
+                            gt_classes=gt_classes,
+                            gt_overlaps=overlaps,
+                            flipped=False,
+                            pseudo=is_pseudo,
+                            label=gt2['label'])
 
-            gt_roidb_mat = self._load_annotation(self.image_index)
-            gt_roidb_xml = [self._load_pascal_annotation(index)
-                            for index in self.image_index]
+
             for i in xrange(len(gt_roidb_mat)):
                 if True:  # combine two gts
+                    roi = combine_gts(gt_roidb_mat[i], gt_roidb_xml[i])
                     gt_roidb.append(combine_gts(gt_roidb_mat[i], gt_roidb_xml[i]))
                 else:  # only use missed gt
                     gt_roidb.append(gt_roidb_xml[i])
@@ -227,6 +232,39 @@ class pascal_voc(imdb):
             box_list = pickle.load(f)
         return self.create_roidb_from_box_list(box_list, gt_roidb)
 
+    def _load_pascal_labels(self, index):
+        """
+        Load label from 20 txt file
+        :param index: id of image
+        :return: 20+1 array
+        """
+        if len(self._image_label_txt)==0:
+            for k in range(1,21): # skip 0 for gt
+                # Example path to image label file:
+                # self._devkit_path + /VOCdevkit2007/VOC2007/ImageSets/Main/aeroplane_trainval.txt
+                image_label_file = os.path.join(self._data_path, 'ImageSets', 'Main',
+                    self._classes[k]+'_'+self._image_set + '.txt')
+                assert os.path.exists(image_label_file), \
+                    'Path does not exist: {}'.format(image_label_file)
+                print("Now loading image label for class", k)
+                d = {} # save to dictionary
+                with open(image_label_file) as f:
+                    for line in f.readlines():
+                        (key, val) = line.strip().split()
+                        d[key] = int(val)
+                self._image_label_txt.append(d)
+        gt_label = np.zeros((len(self._classes)), dtype=np.float32)
+        if self.config['use_diff']:
+            for k in range(1, 21):
+                gt_label[k] = self._image_label_txt[k-1][index] >= 0
+        else:
+            for k in range(1, 21):
+                # print(k, len(gt_label), len(self._image_label_txt))
+                gt_label[k] = self._image_label_txt[k-1][index] > 0
+        #print(index, gt_label)
+        return gt_label.reshape(1, 21)
+
+
     def _load_pascal_annotation(self, index):
         """
     Load image and bounding boxes info from XML file in the PASCAL VOC
@@ -267,14 +305,16 @@ class pascal_voc(imdb):
 
         overlaps = scipy.sparse.csr_matrix(overlaps)
         is_pseudo = np.zeros(gt_classes.shape)
-        not_pseudo = np.ones(boxes.shape),
-
+        not_pseudo = np.ones(boxes.shape)
+        gt_label = self._load_pascal_labels(index)
         return {'boxes': boxes,
                 'gt_classes': gt_classes,
                 'gt_overlaps': overlaps,
                 'flipped': False,
                 'seg_areas': seg_areas,
-                'pseudo': is_pseudo}
+                'pseudo': is_pseudo,
+                'label': gt_label
+                }
                 # 'not_pseudo': not_pseudo}
 
     def _get_comp_id(self):
