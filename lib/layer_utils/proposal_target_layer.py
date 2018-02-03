@@ -98,7 +98,7 @@ def _compute_targets(ex_rois, gt_rois, labels):
     (labels[:, np.newaxis], targets)).astype(np.float32, copy=False)
 
 
-def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_image, num_classes, _pseudo):
+def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_image, num_classes, _pseudo=None):
   """Generate a random sample of RoIs comprising foreground and background
   examples.
   """
@@ -109,7 +109,8 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   gt_assignment = overlaps.argmax(axis=1)
   max_overlaps = overlaps.max(axis=1)
   labels = gt_boxes[gt_assignment, 4]
-  pseudo = _pseudo[gt_assignment]
+  if _pseudo is not None:
+    pseudo = _pseudo[gt_assignment]
   # print(113, _pseudo.shape, gt_assignment.shape, pseudo.shape)
   # Select foreground RoIs as those with >= FG_THRESH overlap
   fg_inds = np.where(max_overlaps >= cfg.TRAIN.FG_THRESH)[0]
@@ -141,7 +142,8 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   keep_inds = np.append(fg_inds, bg_inds)
   # Select sampled values from various arrays:
   labels = labels[keep_inds]
-  pseudo = pseudo[keep_inds]
+  if pseudo is not None:
+    pseudo = pseudo[keep_inds]
   # Clamp labels for the background RoIs to 0
   labels[int(fg_rois_per_image):] = 0
   rois = all_rois[keep_inds]
@@ -153,4 +155,7 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   bbox_targets, bbox_inside_weights = \
     _get_bbox_regression_labels(bbox_target_data, num_classes)
   # print(155, bbox_targets.shape)
-  return labels, pseudo, rois, roi_scores, bbox_targets, bbox_inside_weights
+  if pseudo is not None:
+    return labels, pseudo, rois, roi_scores, bbox_targets, bbox_inside_weights
+  else:
+    return labels, rois, roi_scores, bbox_targets, bbox_inside_weights

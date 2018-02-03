@@ -133,6 +133,7 @@ class SolverWrapper(object):
       if cfg.TRAIN.DOUBLE_BIAS:
         final_gvs = []
         with tf.variable_scope('Gradient_Mult') as scope:
+          # print(gvs)
           for grad, var in gvs:
             scale = 1.
             if cfg.TRAIN.DOUBLE_BIAS and '/biases:' in var.name:
@@ -282,7 +283,7 @@ class SolverWrapper(object):
       now = time.time()
       if iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
         # Compute the graph with summary
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, total_loss, summary = \
+        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, frog_loss, total_loss, summary = \
           self.net.train_step_with_summary(sess, blobs, train_op)
         self.writer.add_summary(summary, float(iter))
         # Also check the summary on the validation set
@@ -299,8 +300,8 @@ class SolverWrapper(object):
       # Display training information
       if iter % (cfg.TRAIN.DISPLAY) == 0:
         print('iter: %d / %d, total loss: %.6f\n >>> rpn_loss_cls: %.6f\n '
-              '>>> rpn_loss_box: %.6f\n >>> loss_cls: %.6f\n >>> loss_box: %.6f\n >>> label_loss: %.6f\n >>> lr: %f' % \
-              (iter, max_iters, total_loss, rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, lr.eval()))
+              '>>> rpn_loss_box: %.6f\n >>> loss_cls: %.6f\n >>> loss_box: %.6f\n >>> label_loss: %.6f\n >>> frog_loss: %.6f\n >>> lr: %f' % \
+              (iter, max_iters, total_loss, rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, label_loss, frog_loss, lr.eval()))
         print('speed: {:.3f}s / iter'.format(timer.average_time))
 
       # Snapshotting
