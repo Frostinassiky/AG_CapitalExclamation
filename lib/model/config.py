@@ -77,6 +77,9 @@ __C.TRAIN.FG_FRACTION = 0.25
 # Overlap threshold for a ROI to be considered foreground (if >= FG_THRESH)
 __C.TRAIN.FG_THRESH = 0.5
 
+# Overlap threshold for a pseudo ROI to be considered foreground (if >= FG_THRESH)
+__C.TRAIN.P_FG_THRESH = 0.6
+
 # Overlap threshold for a ROI to be considered background (class = 0 if
 # overlap in [LO, HI))
 __C.TRAIN.BG_THRESH_HI = 0.5

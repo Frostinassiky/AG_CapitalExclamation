@@ -264,11 +264,11 @@ class Network(object):
 
         return rois, cls_prob, bbox_pred, label_score
 
-    def _smooth_l1_loss(self, bbox_pred, bbox_targets, bbox_inside_weights, bbox_outside_weights, sigma=1.0, dim=[1], pseudo=None):
+    def _smooth_l1_loss(self, bbox_pred, bbox_targets, bbox_inside_weights, bbox_outside_weights, sigma=1.0, dim=[1], pseudo=None, weight=0.1):
         sigma_2 = sigma ** 2
         box_diff = bbox_pred - bbox_targets
         if pseudo is not None:
-            box_diff = box_diff - box_diff * pseudo
+            box_diff = box_diff - box_diff * pseudo * (1-weight)
         in_box_diff = bbox_inside_weights * box_diff
         abs_in_box_diff = tf.abs(in_box_diff)
         smoothL1_sign = tf.stop_gradient(tf.to_float(tf.less(abs_in_box_diff, 1. / sigma_2)))
@@ -281,7 +281,7 @@ class Network(object):
         ))
         return loss_box
 
-    def _add_losses(self, sigma_rpn=3.0, w_label=0.2, w_frog=0.5):
+    def _add_losses(self, sigma_rpn=3.0, w_label=0.2, w_frog=2):
         with tf.variable_scope('LOSS_' + self._tag) as scope:
             # RPN, class loss
             rpn_cls_score = tf.reshape(self._predictions['rpn_cls_score_reshape'], [-1, 2])
@@ -301,10 +301,20 @@ class Network(object):
                                                 rpn_bbox_outside_weights, sigma=sigma_rpn, dim=[1, 2, 3])
 
             # RCNN, class loss
+            # ignore negative pseudo
             cls_score = self._predictions['cls_score']
             label = tf.reshape(self._proposal_targets['labels'], [-1])
+            bbox_pseudo = self._proposal_targets['pseudo']
+            keep_idx = []
+            for k in xrange(len(cls_score)):
+                # keep condition: 1, P / N by gt
+                # --------------- 2, P by pseudo
+                if label[k] == 0 and bbox_pseudo[k] == 1:
+                    pass
+                else:
+                    keep_idx.append(k)
             cross_entropy = tf.reduce_mean(
-                tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cls_score, labels=label))
+                tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cls_score[keep_idx], labels=label[keep_idx]))
 
             # RCNN, label loss
             # print(lb_score.get_shape())

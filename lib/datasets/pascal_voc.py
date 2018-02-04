@@ -24,7 +24,7 @@ import uuid
 from .voc_eval import voc_eval
 from model.config import cfg
 from scipy.sparse import vstack
-
+from utils.cython_bbox import bbox_overlaps
 
 class pascal_voc(imdb):
     def __init__(self, image_set, year, use_diff=False):
@@ -128,15 +128,31 @@ class pascal_voc(imdb):
 
             def combine_gts(gt1, gt2):
                 # gt1 is pseudo box
-                boxes = np.concatenate((gt1['boxes'], gt2['boxes']), axis=0)
+                # boxes = np.concatenate((gt1['boxes'], gt2['boxes']), axis=0)
                 #boxes_vis = np.concatenate((gt1['boxes_vis'], gt2['boxes_vis']), axis=0)
+                gt_boxes = gt2['boxes']
+                boxes = gt1['boxes']
+                if len(gt_boxes)==0:
+                    keep_inds = range(len(boxes))
+                else:
+                    inner_overlaps = bbox_overlaps(
+                        np.ascontiguousarray(boxes, dtype=np.float),
+                        np.ascontiguousarray(gt_boxes, dtype=np.float))
+                    # gt_assignment = overlaps.argmax(axis=1)
+                    max_overlaps = inner_overlaps.max(axis=1)
+                    keep_inds = np.where(max_overlaps < cfg.TRAIN.P_FG_THRESH)[0] # keep boxes which have small / no overlap
+                DEBUG = True
+                if DEBUG:
+                    if len(keep_inds) != len(boxes):
+                        print('From '+str(len(boxes)) + ' choose ' + str(keep_inds))
 
-                gt_classes = np.concatenate((gt1['gt_classes'], gt2['gt_classes']), axis=0)
+                boxes = np.concatenate((gt1['boxes'][keep_inds], gt2['boxes']), axis=0)
+                gt_classes = np.concatenate((gt1['gt_classes'][keep_inds], gt2['gt_classes']), axis=0)
 
-                is_pseudo = np.concatenate((np.ones(gt1['gt_classes'].shape), np.zeros(gt2['gt_classes'].shape)), axis=0)
+                is_pseudo = np.concatenate((np.ones(gt1['gt_classes'][keep_inds].shape), np.zeros(gt2['gt_classes'].shape)), axis=0)
                 # not_pseudo = np.concatenate((np.zeros(gt1['boxes'].shape), np.ones(gt2['boxes'].shape)), axis=0)
 
-                overlaps = vstack([gt1['gt_overlaps'], gt2['gt_overlaps']]).todense()
+                overlaps = vstack([gt1['gt_overlaps'][keep_inds], gt2['gt_overlaps']]).todense()
                 overlaps = scipy.sparse.csr_matrix(overlaps)
                 return dict(boxes=boxes,
                             gt_classes=gt_classes,
