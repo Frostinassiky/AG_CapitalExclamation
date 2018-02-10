@@ -301,20 +301,14 @@ class Network(object):
                                                 rpn_bbox_outside_weights, sigma=sigma_rpn, dim=[1, 2, 3])
 
             # RCNN, class loss
-            # ignore negative pseudo
+            # ignored negative pseudo
             cls_score = self._predictions['cls_score']
             label = tf.reshape(self._proposal_targets['labels'], [-1])
             bbox_pseudo = self._proposal_targets['pseudo']
-            keep_idx = []
-            for k in xrange(len(cls_score)):
-                # keep condition: 1, P / N by gt
-                # --------------- 2, P by pseudo
-                if label[k] == 0 and bbox_pseudo[k] == 1:
-                    pass
-                else:
-                    keep_idx.append(k)
             cross_entropy = tf.reduce_mean(
-                tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cls_score[keep_idx], labels=label[keep_idx]))
+                tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cls_score, labels=label)
+                # tf.losses.sparse_softmax_cross_entropy(labels=label, logits=cls_score, weights=1-(bbox_pseudo*(label==0)) )
+            )
 
             # RCNN, label loss
             # print(lb_score.get_shape())
