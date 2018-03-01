@@ -191,12 +191,12 @@ class Network(object):
 
             return rois, roi_scores
 
-    def _frog_layer(self, boxes, cls_prob, im_labels, name):
+    def _frog_layer(self, boxes, gt_boxes, cls_prob, im_labels, name):
         with tf.variable_scope(name) as scope:
             # update frog_layer
             labels, cls_loss_weights = tf.py_func(
                 frog_layer,
-                [boxes, cls_prob, im_labels],
+                [boxes, gt_boxes, cls_prob, im_labels],
                 [tf.int32, tf.float32],
                 name='pseudo_target')
 
@@ -439,10 +439,11 @@ class Network(object):
 
         if is_training:
             # print(435, self._predictions['rois'].shape)
-            boxes = self._predictions['rois']  # (0, x1, y1, x2, y2)
-            cls_prob = proposal_score  # midn_prob
+            boxes = self._predictions['rois']  # (0, x1, y1, x2, y2) 256*5
+            gt_boxes = self._gt_boxes #(?*5)
+            cls_prob = proposal_score  # midn_prob 256*21
             im_labels = self._label  # match size: 21
-            labels, cls_loss_weights = self._frog_layer(boxes, cls_prob, im_labels, 'frog_layer')
+            labels, cls_loss_weights = self._frog_layer(boxes, gt_boxes,cls_prob, im_labels, 'frog_layer')
 
             # self._predictions['labels'] = labels
             # self._predictions['label_weights'] = cls_loss_weights

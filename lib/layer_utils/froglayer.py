@@ -23,14 +23,30 @@ from utils.cython_bbox import bbox_overlaps
 DEBUG = False
 
 
-def frog_layer(boxes, cls_prob, im_labels):
+def frog_layer(boxes, _gt_boxes, cls_prob, im_labels):
     """Get blobs and copy them into this layer's top blob vector."""
+    cls_prob = cls_prob[:,-20:]
+    # print("cls_prob", cls_prob.shape[1])
+    assert cls_prob.shape[1] == 20, \
+        "cls_prob.shape[1] is not 20"
 
     """Get proposals with highest score."""
     im_labels = im_labels[:, 1:]  # remove bg
     boxes = boxes[:, 1:]
+    # print(im_labels)
     if DEBUG:
-        print('im_labels', im_labels.shape)
+        print("cls_prob", cls_prob.shape) # 256,21
+    if len(_gt_boxes) !=0:
+        for k in range(len(_gt_boxes)):
+            np.vstack((_gt_boxes[k,1:], boxes))
+            tmp = np.zeros((1,20), dtype=np.float32)
+            if DEBUG:
+                print("object label", int(_gt_boxes[k,4]))
+            tmp[0, int(_gt_boxes[k,4])-1] = 1
+            np.vstack((tmp, cls_prob))
+
+    if DEBUG:
+        print('cls_prob', cls_prob.shape)
     num_images, num_classes = im_labels.shape
     assert num_images == 1, 'batch size shoud be equal to 1'
     im_labels_tmp = im_labels[0, :]
@@ -39,7 +55,7 @@ def frog_layer(boxes, cls_prob, im_labels):
     gt_scores = np.zeros((0, 1), dtype=np.float32)
     for i in xrange(num_classes):
         if im_labels_tmp[i] == 1:
-            cls_prob_tmp = cls_prob[:, i].copy()
+            cls_prob_tmp = cls_prob[:, i-1].copy() # bg is removes
             max_index = np.argmax(cls_prob_tmp)
 
             if DEBUG:
