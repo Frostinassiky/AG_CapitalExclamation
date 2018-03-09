@@ -178,6 +178,7 @@ def test_net(sess, net, imdb, weights_filename, max_per_image=100, thresh=0.):
         for j in range(1, imdb.num_classes):
           keep = np.where(all_boxes[j][i][:, -1] >= image_thresh)[0]
           all_boxes[j][i] = all_boxes[j][i][keep, :]
+    # save labelled image
     _t['misc'].toc()
 
     print('im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
